@@ -21,10 +21,6 @@ def energy_spectra(U, N, L):
     """
     Get the 1D and 3D energy spectra from 3D data.
 
-    This is a compressible implementation of Eq. 6.210 in Pope
-    (p. 225). We use the momentum (\rho*u) to calculate the kinetic
-    energy.
-
     :param U: momentum, [:math:`\rho u`, :math:`\rho v`, :math:`\rho w`]
     :type U: list.
     :param N: number of points, [:math:`n_x`, :math:`n_y`, :math:`n_z`]
