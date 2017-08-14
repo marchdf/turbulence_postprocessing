@@ -145,3 +145,41 @@ def integral_length_scale_tensor(U, N, L):
             Lij[i, j] = spi.simps(Rij, dx=dr[j]) / Rij[0]
 
     return Lij
+
+
+# ========================================================================
+def structure_functions(U, N, L):
+    """
+    Calculate the longitudinal and transverse structure functions.
+
+    :math:`D_{ij} = \int_V \left(u_i(x+r)-u_i(x)\right) \left(u_j(x+r)-u_j(x)\right) \mathrm{d} V`
+    and :math:`S_{L} = D_{00}`, :math:`S_{T1} = D_{11}`, :math:`S_{T2} = D_{22}`.
+
+    :param U: momentum, [:math:`\rho u`, :math:`\rho v`, :math:`\rho w`]
+    :type U: list.
+    :param N: number of points, [:math:`n_x`, :math:`n_y`, :math:`n_z`]
+    :type N: list.
+    :param L: domain lengths, [:math:`L_x`, :math:`L_y`, :math:`L_z`]
+    :type L: list.
+    :return: Dataframe of structure functions
+    :rtype: dataframe.
+    """
+
+    # Get the structure functions
+    SL = np.zeros(N[0])
+    ST1 = np.zeros(N[0])
+    ST2 = np.zeros(N[0])
+    for i in range(N[0]):
+        for r in range(N[0]):
+            SL[r] += np.sum((U[0][(i + r) % N[0], :, :] - U[0][i, :, :])**2)
+            ST1[r] += np.sum((U[1][(i + r) % N[0], :, :] - U[1][i, :, :])**2)
+            ST2[r] += np.sum((U[2][(i + r) % N[0], :, :] - U[2][i, :, :])**2)
+
+    # Store the data
+    df = pd.DataFrame(columns=['r', 'SL', 'ST1', 'ST2'])
+    df['r'] = np.linspace(0, L[0], N[0])
+    df['SL'] = SL / np.prod(N)
+    df['ST1'] = ST1 / np.prod(N)
+    df['ST2'] = ST2 / np.prod(N)
+
+    return df
