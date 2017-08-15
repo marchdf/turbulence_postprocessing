@@ -20,6 +20,7 @@
 import os
 import sys
 sys.path.append(os.path.abspath('../turbulence_postprocessing'))
+sys.path.append(os.path.abspath('../turbulence_postprocessing/tests'))
 
 
 # -- General configuration ------------------------------------------------

@@ -22,13 +22,13 @@ def energy_spectra(U, N, L):
     Get the 1D and 3D energy spectra from 3D data.
 
     :param U: momentum, [:math:`u`, :math:`v`, :math:`w`]
-    :type U: list.
+    :type U: list
     :param N: number of points, [:math:`n_x`, :math:`n_y`, :math:`n_z`]
-    :type N: list.
+    :type N: list
     :param L: domain lengths, [:math:`L_x`, :math:`L_y`, :math:`L_z`]
-    :type L: list.
+    :type L: list
     :return: Dataframe of 1D and 3D energy spectra
-    :rtype: dataframe.
+    :rtype: dataframe
     """
 
     # FFT of fields
@@ -114,13 +114,13 @@ def integral_length_scale_tensor(U, N, L):
     where :math:`R_{ij}(r) = \\langle u_i(x) u_j(x+r) \\rangle`
 
     :param U: momentum, [:math:`u`, :math:`v`, :math:`w`]
-    :type U: list.
+    :type U: list
     :param N: number of points, [:math:`n_x`, :math:`n_y`, :math:`n_z`]
-    :type N: list.
+    :type N: list
     :param L: domain lengths, [:math:`L_x`, :math:`L_y`, :math:`L_z`]
-    :type L: list.
-    :return: Array of the lengthscale tensor, :math:`Lij`
-    :rtype: array.
+    :type L: list
+    :return: Array of the lengthscale tensor, :math:`L_{ij}`
+    :rtype: array
     """
 
     dr = L / N
@@ -158,13 +158,13 @@ def structure_functions(U, N, L):
     and :math:`S_{L} = D_{00}`, :math:`S_{T1} = D_{11}`, :math:`S_{T2} = D_{22}`.
 
     :param U: momentum, [:math:`u`, :math:`v`, :math:`w`]
-    :type U: list.
+    :type U: list
     :param N: number of points, [:math:`n_x`, :math:`n_y`, :math:`n_z`]
-    :type N: list.
+    :type N: list
     :param L: domain lengths, [:math:`L_x`, :math:`L_y`, :math:`L_z`]
-    :type L: list.
+    :type L: list
     :return: Dataframe of structure functions
-    :rtype: dataframe.
+    :rtype: dataframe
     """
 
     # Get the structure functions

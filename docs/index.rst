@@ -10,7 +10,8 @@ Welcome to turbulence_postprocessing's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   turbulence_postprocessing     
+   turbulence_postprocessing
+   test_turbulence_postprocessing
 
 
 Indices and tables
