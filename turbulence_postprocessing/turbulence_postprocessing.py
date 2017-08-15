@@ -43,6 +43,7 @@ def energy_spectra(U, N, L):
     kmax = [k0.max(), k1.max(), k2.max()]
     K = np.meshgrid(k0, k1, k2)
     kmag = np.sqrt(K[0]**2 + K[1]**2 + K[2]**2)
+    halfN = np.array([int(n / 2) for n in N], dtype=np.int64)
 
     # Calculate the 1D energy spectra Eii(kj)
     df = pd.DataFrame(columns=['name', 'k', 'E'])
@@ -58,7 +59,7 @@ def energy_spectra(U, N, L):
         for j in range(3):
 
             # Binning
-            kbins = np.arange(0, N[j] / 2 + 1)
+            kbins = np.arange(0, halfN[j] + 1)
             whichbin = np.digitize(np.abs(K[j]).flat, kbins)
             ncount = np.bincount(whichbin)
 
@@ -84,7 +85,7 @@ def energy_spectra(U, N, L):
     dkdkdk = np.prod(kmax) / np.prod(N)
 
     # Binning
-    kbins = np.arange(0, N[0] / 2 + 1)
+    kbins = np.arange(0, halfN[0] + 1)
     whichbin = np.digitize(kmag.flat, kbins)
     ncount = np.bincount(whichbin)
 
@@ -124,14 +125,15 @@ def integral_length_scale_tensor(U, N, L):
 
     dr = L / N
     Lij = np.zeros((3, 3))
+    halfN = np.array([int(n / 2) for n in N], dtype=np.int64)
 
     for i in range(3):
         for j in range(3):
 
-            Rij = np.zeros(N[j] / 2 + 1)
+            Rij = np.zeros(halfN[j] + 1)
 
             for m in range(N[j]):
-                for r in range(N[j] / 2 + 1):
+                for r in range(halfN[j] + 1):
                     if j == 0:
                         Rij[r] += np.sum((U[i][m, :, :]
                                           * U[i][(m + r) % N[j], :, :]))
