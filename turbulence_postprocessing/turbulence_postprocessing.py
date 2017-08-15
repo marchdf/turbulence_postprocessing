@@ -21,7 +21,7 @@ def energy_spectra(U, N, L):
     """
     Get the 1D and 3D energy spectra from 3D data.
 
-    :param U: momentum, [:math:`\rho u`, :math:`\rho v`, :math:`\rho w`]
+    :param U: momentum, [:math:`u`, :math:`v`, :math:`w`]
     :type U: list.
     :param N: number of points, [:math:`n_x`, :math:`n_y`, :math:`n_z`]
     :type N: list.
@@ -110,10 +110,10 @@ def integral_length_scale_tensor(U, N, L):
     """
     Calculate the integral lengthscale tensor.
 
-    :math:`L_{ij} = \frac{1}{R_{ii}(0)} \int_0^\infty R_{ii}(e_j r) \mathrm{d} r`
-    where :math:`R_{ij}(r) = <u_i(x) * u_j(x+r) >`
+    :math:`L_{ij} = \\frac{1}{R_{ii}(0)} \\int_0^\\infty R_{ii}(e_j r) \\mathrm{d} r`
+    where :math:`R_{ij}(r) = \\langle u_i(x) u_j(x+r) \\rangle`
 
-    :param U: momentum, [:math:`\rho u`, :math:`\rho v`, :math:`\rho w`]
+    :param U: momentum, [:math:`u`, :math:`v`, :math:`w`]
     :type U: list.
     :param N: number of points, [:math:`n_x`, :math:`n_y`, :math:`n_z`]
     :type N: list.
@@ -154,10 +154,10 @@ def structure_functions(U, N, L):
     """
     Calculate the longitudinal and transverse structure functions.
 
-    :math:`D_{ij} = \int_V \left(u_i(x+r)-u_i(x)\right) \left(u_j(x+r)-u_j(x)\right) \mathrm{d} V`
+    :math:`D_{ij} = \\int_V (u_i(x+r)-u_i(x)) (u_j(x+r)-u_j(x)) \\mathrm{d} V`
     and :math:`S_{L} = D_{00}`, :math:`S_{T1} = D_{11}`, :math:`S_{T2} = D_{22}`.
 
-    :param U: momentum, [:math:`\rho u`, :math:`\rho v`, :math:`\rho w`]
+    :param U: momentum, [:math:`u`, :math:`v`, :math:`w`]
     :type U: list.
     :param N: number of points, [:math:`n_x`, :math:`n_y`, :math:`n_z`]
     :type N: list.
