@@ -51,7 +51,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'turbulence_postprocessing'
-copyright = '2017, Marc T. Henry de Frahan'
+copyright = '2017, National Renewable Energy Laboratory'
 author = 'Marc T. Henry de Frahan'
 
 # The version info for the project you're documenting, acts as replacement for
