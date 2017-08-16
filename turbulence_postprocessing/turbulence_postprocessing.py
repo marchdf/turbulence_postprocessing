@@ -111,7 +111,7 @@ def integral_length_scale_tensor(U, N, L):
     Calculate the integral lengthscale tensor.
 
     :math:`L_{ij} = \\frac{1}{R_{ii}(0)} \\int_0^\\infty R_{ii}(e_j r) \\mathrm{d} r`
-    where :math:`R_{ij}(r) = \\langle u_i(x) u_j(x+r) \\rangle`
+    where :math:`R_{ij}(\\mathbf{r}) = \\langle u_i(\\mathbf{x}) u_j(\\mathbf{x}+\\mathbf{r}) \\rangle`
 
     :param U: momentum, [:math:`u`, :math:`v`, :math:`w`]
     :type U: list
@@ -130,21 +130,21 @@ def integral_length_scale_tensor(U, N, L):
     for i in range(3):
         for j in range(3):
 
-            Rij = np.zeros(halfN[j] + 1)
+            Rii = np.zeros(halfN[j] + 1)
 
             for m in range(N[j]):
                 for r in range(halfN[j] + 1):
                     if j == 0:
-                        Rij[r] += np.sum((U[i][m, :, :]
+                        Rii[r] += np.sum((U[i][m, :, :]
                                           * U[i][(m + r) % N[j], :, :]))
                     elif j == 1:
-                        Rij[r] += np.sum((U[i][:, m, :]
+                        Rii[r] += np.sum((U[i][:, m, :]
                                           * U[i][:, (m + r) % N[j], :]))
                     elif j == 2:
-                        Rij[r] += np.sum((U[i][:, :, m]
+                        Rii[r] += np.sum((U[i][:, :, m]
                                           * U[i][:, :, (m + r) % N[j]]))
-            Rij = Rij / np.prod(N)
-            Lij[i, j] = spi.simps(Rij, dx=dr[j]) / Rij[0]
+            Rii = Rii / np.prod(N)
+            Lij[i, j] = spi.simps(Rii, dx=dr[j]) / Rii[0]
 
     return Lij
 
