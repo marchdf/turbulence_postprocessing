@@ -23,7 +23,8 @@ setup(name='turbulence_postprocessing',
       install_requires=[
           'numpy',
           'pandas',
-          'scipy'
+          'scipy',
+          'sphinx_rtd_theme'
       ],
       test_suite='turbulence_postprocessing/tests',
       tests_require=['nose'],
