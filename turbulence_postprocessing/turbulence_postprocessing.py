@@ -21,6 +21,20 @@ def energy_spectra(U, N, L):
     """
     Get the 1D and 3D energy spectra from 3D data.
 
+    The 1D energy spectra in the :math:`x`-direction are defined as (similar in :math:`y` and :math:`z`):
+
+    - :math:`E_{00}(k_0) = 2 \\int \\int \\phi_{00}(k_0,k_1,k_2) \\mathrm{d}k_1\\mathrm{d}k_2`
+
+    - :math:`E_{00}(k_1) = 2 \\int \\int \\phi_{00}(k_0,k_1,k_2) \\mathrm{d}k_0\\mathrm{d}k_2`
+
+    - :math:`E_{00}(k_2) = 2 \\int \\int \\phi_{00}(k_0,k_1,k_2) \\mathrm{d}k_0\\mathrm{d}k_1`
+
+    The 3D energy spectrum is defined as:
+
+    - :math:`E_{3D}(k) = 2 \\pi \\int \\int \\int \\phi_{ii}(k_0,k_1,k_2) \\mathrm{d}k_0\\mathrm{d}k_1\\mathrm{d}k_2`
+
+    where :math:`k=\\sqrt{k_0^2 + k_1^2 + k_2^2}`
+
     :param U: momentum, [:math:`u`, :math:`v`, :math:`w`]
     :type U: list
     :param N: number of points, [:math:`n_x`, :math:`n_y`, :math:`n_z`]
@@ -130,19 +144,20 @@ def integral_length_scale_tensor(U, N, L):
     for i in range(3):
         for j in range(3):
 
-            Rii = np.zeros(halfN[j] + 1)
+            idxm = (j + 1) % 3
+            idxn = (j + 2) % 3
 
-            for m in range(N[j]):
-                for r in range(halfN[j] + 1):
-                    if j == 0:
-                        Rii[r] += np.sum((U[i][m, :, :]
-                                          * U[i][(m + r) % N[j], :, :]))
-                    elif j == 1:
-                        Rii[r] += np.sum((U[i][:, m, :]
-                                          * U[i][:, (m + r) % N[j], :]))
-                    elif j == 2:
-                        Rii[r] += np.sum((U[i][:, :, m]
-                                          * U[i][:, :, (m + r) % N[j]]))
+            Uf = np.fft.rfft(U[i], axis=j)
+
+            if j == 0:
+                Rii = np.sum(np.fft.irfft(Uf * np.conj(Uf), axis=j)[:halfN[i] + 1, :, :],
+                             axis=(idxm, idxn))
+            elif j == 1:
+                Rii = np.sum(np.fft.irfft(Uf * np.conj(Uf), axis=j)[:, :halfN[i] + 1, :],
+                             axis=(idxm, idxn))
+            elif j == 2:
+                Rii = np.sum(np.fft.irfft(Uf * np.conj(Uf), axis=j)[:, :, :halfN[i] + 1],
+                             axis=(idxm, idxn))
             Rii = Rii / np.prod(N)
             Lij[i, j] = spi.simps(Rii, dx=dr[j]) / Rii[0]
 
@@ -154,7 +169,7 @@ def structure_functions(U, N, L):
     """
     Calculate the longitudinal and transverse structure functions.
 
-    :math:`D_{ij} = \\int_V (u_i(x+r)-u_i(x)) (u_j(x+r)-u_j(x)) \\mathrm{d} V`
+    :math:`D_{ij} = \\int_V (u_i(x+r,y,z)-u_i(x,y,z)) (u_j(x+r,y,z)-u_j(x,y,z)) \\mathrm{d} V`
     and :math:`S_{L} = D_{00}`, :math:`S_{T1} = D_{11}`, :math:`S_{T2} = D_{22}`.
 
     :param U: momentum, [:math:`u`, :math:`v`, :math:`w`]
@@ -163,7 +178,7 @@ def structure_functions(U, N, L):
     :type N: list
     :param L: domain lengths, [:math:`L_x`, :math:`L_y`, :math:`L_z`]
     :type L: list
-    :return: Dataframe of structure functions
+    :return: Dataframe of structure functions (:math:`S_{L}`, :math:`S_{T1}`, and :math:`S_{T2}`)
     :rtype: dataframe
     """
 

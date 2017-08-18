@@ -25,7 +25,7 @@ setup(name='turbulence_postprocessing',
           'pandas',
           'scipy'
       ],
-      test_suite='nose.collector',
+      test_suite='turbulence_postprocessing/tests',
       tests_require=['nose'],
       include_package_data=True,
       zip_safe=False)
