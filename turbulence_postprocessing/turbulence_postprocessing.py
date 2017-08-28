@@ -169,7 +169,8 @@ def structure_functions(U, N, L):
     """
     Calculate the longitudinal and transverse structure functions.
 
-    :math:`D_{ij} = \\int_V (u_i(x+r,y,z)-u_i(x,y,z)) (u_j(x+r,y,z)-u_j(x,y,z)) \\mathrm{d} V`
+    :math:`D_{ij}(r) = \\int_V (u_i(x+r,y,z)-u_i(x,y,z)) (u_j(x+r,y,z)-u_j(x,y,z)) \\mathrm{d} V`
+
     and :math:`S_{L} = D_{00}`, :math:`S_{T1} = D_{11}`, :math:`S_{T2} = D_{22}`.
 
     :param U: momentum, [:math:`u`, :math:`v`, :math:`w`]
@@ -183,18 +184,19 @@ def structure_functions(U, N, L):
     """
 
     # Get the structure functions
-    SL = np.zeros(N[0])
-    ST1 = np.zeros(N[0])
-    ST2 = np.zeros(N[0])
+    halfN = np.array([int(n / 2) for n in N], dtype=np.int64)
+    SL = np.zeros(halfN[0] + 1)
+    ST1 = np.zeros(halfN[0] + 1)
+    ST2 = np.zeros(halfN[0] + 1)
     for i in range(N[0]):
-        for r in range(N[0]):
+        for r in range(halfN[0] + 1):
             SL[r] += np.sum((U[0][(i + r) % N[0], :, :] - U[0][i, :, :])**2)
             ST1[r] += np.sum((U[1][(i + r) % N[0], :, :] - U[1][i, :, :])**2)
             ST2[r] += np.sum((U[2][(i + r) % N[0], :, :] - U[2][i, :, :])**2)
 
     # Store the data
     df = pd.DataFrame(columns=['r', 'SL', 'ST1', 'ST2'])
-    df['r'] = np.linspace(0, L[0], N[0])
+    df['r'] = L[0] / N[0] * np.arange(halfN[0] + 1)
     df['SL'] = SL / np.prod(N)
     df['ST1'] = ST1 / np.prod(N)
     df['ST2'] = ST2 / np.prod(N)
