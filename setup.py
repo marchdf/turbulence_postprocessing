@@ -26,7 +26,7 @@ setup(name='turbulence_postprocessing',
           'scipy',
           'sphinx_rtd_theme'
       ],
-      test_suite='turbulence_postprocessing/tests',
+      test_suite='tests',
       tests_require=['nose'],
       include_package_data=True,
       zip_safe=False)

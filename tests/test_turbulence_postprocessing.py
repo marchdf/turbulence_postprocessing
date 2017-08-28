@@ -5,7 +5,7 @@
 import unittest
 import numpy as np
 import numpy.testing as npt
-import turbulence_postprocessing as tp
+import turbulence_postprocessing.turbulence_postprocessing as tp
 
 
 class TurbulencePostProcessingTestCase(unittest.TestCase):

@@ -1,5 +1,5 @@
 include *.rst LICENSE docs/Makefile
-recursive-include turbulence_postprocessing/tests *.py
+recursive-include tests *.py
 recursive-include docs *.rst
 recursive-include docs *.py
 prune docs/_build

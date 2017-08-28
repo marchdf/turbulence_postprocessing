@@ -21,7 +21,7 @@ import os
 import sys
 import sphinx_rtd_theme
 sys.path.append(os.path.abspath('../turbulence_postprocessing'))
-sys.path.append(os.path.abspath('../turbulence_postprocessing/tests'))
+sys.path.append(os.path.abspath('../tests'))
 
 
 # -- General configuration ------------------------------------------------
