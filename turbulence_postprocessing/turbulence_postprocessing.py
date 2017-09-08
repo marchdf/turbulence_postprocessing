@@ -35,6 +35,13 @@ def energy_spectra(U, N, L):
 
     where :math:`k=\\sqrt{k_0^2 + k_1^2 + k_2^2}`
 
+    .. note::
+
+       For the 3D spectrum, the bins are defined by rounding the
+       wavenumber :math:`k` to the closest integer. An average of
+       every :math:`k` in each bin is then used as the return value
+       for that bin.
+
     :param U: momentum, [:math:`u`, :math:`v`, :math:`w`]
     :type U: list
     :param N: number of points, [:math:`n_x`, :math:`n_y`, :math:`n_z`]
@@ -90,28 +97,31 @@ def energy_spectra(U, N, L):
             subdf['name'] = 'E{0:d}{0:d}(k{1:d})'.format(i, j)
             df = pd.concat([df, subdf], ignore_index=True)
 
-    # Calculate the 3D energy spectra
-    E3D = np.real(Uf[0] * np.conj(Uf[0])
+    # Calculate the 3D energy spectra multiplied by the surface area
+    # of the sphere at kmag.
+    E3D = 2.0 * np.pi * kmag**2 \
+        * np.real(Uf[0] * np.conj(Uf[0])
                   + Uf[1] * np.conj(Uf[1])
                   + Uf[2] * np.conj(Uf[2])) / (np.prod(N)**2)
 
-    # Wavenumber spacing (shell thickness)
-    dkdkdk = np.prod(kmax) / np.prod(N)
-
     # Binning
-    kbins = np.arange(0, halfN[0] + 1)
-    whichbin = np.digitize(kmag.flat, kbins)
+    kbins = np.hstack((-1e-16,
+                       np.arange(0.5, halfN[0] - 1),
+                       halfN[0] - 1))
+    whichbin = np.digitize(kmag.flat, kbins, right=True)
     ncount = np.bincount(whichbin)
 
-    # Summation in each wavenumber bin
-    E = np.zeros(len(kbins))
-    for n in range(1, len(ncount)):
-        E[n - 1] = 2 * np.pi * np.sum(E3D.flat[whichbin == n]) * dkdkdk
+    # Average in each wavenumber bin
+    E = np.zeros(len(kbins) - 1)
+    kavg = np.zeros(len(kbins) - 1)
+    for n in range(1, len(kbins)):
+        E[n - 1] = np.mean(E3D.flat[whichbin == n])
+        kavg[n - 1] = np.mean(kmag.flat[whichbin == n])
     E[E < 1e-13] = 0.0
 
     # Store the data
     subdf = pd.DataFrame(columns=['name', 'k', 'E'])
-    subdf['k'] = kbins
+    subdf['k'] = kavg
     subdf['E'] = E
     subdf['name'] = 'E3D'
     df = pd.concat([df, subdf], ignore_index=True)
