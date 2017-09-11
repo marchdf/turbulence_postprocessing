@@ -18,29 +18,22 @@ import scipy.integrate as spi
 #
 # ========================================================================
 def energy_spectra(U, N, L):
-    """
-    Get the 1D and 3D energy spectra from 3D data.
+    """Get the 1D and 3D energy spectra from 3D data.
 
-    The 1D energy spectra in the :math:`x`-direction are defined as (similar in :math:`y` and :math:`z`):
+    The 3D energy spectrum is defined as (see Eq. 6.188 in Pope):
 
-    - :math:`E_{00}(k_0) = 2 \\int \\int \\phi_{00}(k_0,k_1,k_2) \\mathrm{d}k_1\\mathrm{d}k_2`
+    - :math:`E_{3D}(k) = \\frac{1}{2} \\int_S \\phi_{ii}(k_0,k_1,k_2) \\mathrm{d}S(k)`
 
-    - :math:`E_{00}(k_1) = 2 \\int \\int \\phi_{00}(k_0,k_1,k_2) \\mathrm{d}k_0\\mathrm{d}k_2`
-
-    - :math:`E_{00}(k_2) = 2 \\int \\int \\phi_{00}(k_0,k_1,k_2) \\mathrm{d}k_0\\mathrm{d}k_1`
-
-    The 3D energy spectrum is defined as:
-
-    - :math:`E_{3D}(k) = 2 \\pi \\int \\int \\int \\phi_{ii}(k_0,k_1,k_2) \\mathrm{d}k_0\\mathrm{d}k_1\\mathrm{d}k_2`
-
-    where :math:`k=\\sqrt{k_0^2 + k_1^2 + k_2^2}`
+    where :math:`k=\\sqrt{k_0^2 + k_1^2 + k_2^2}`.
 
     .. note::
 
-       For the 3D spectrum, the bins are defined by rounding the
-       wavenumber :math:`k` to the closest integer. An average of
-       every :math:`k` in each bin is then used as the return value
-       for that bin.
+       For the 3D spectrum, the integral is approximated by averaging
+       :math:`\\phi_{ii}(k_0,k_1,k_2)` over a binned :math:`k` and
+       multiplying by the surface area of the sphere at :math:`k`. The
+       bins are defined by rounding the wavenumber :math:`k` to the
+       closest integer. An average of every :math:`k` in each bin is
+       then used as the return value for that bin.
 
     :param U: momentum, [:math:`u`, :math:`v`, :math:`w`]
     :type U: list
@@ -50,7 +43,14 @@ def energy_spectra(U, N, L):
     :type L: list
     :return: Dataframe of 1D and 3D energy spectra
     :rtype: dataframe
+
     """
+
+    # =========================================================================
+    # Setup
+
+    # Initialize empty dataframe
+    df = pd.DataFrame(columns=['name', 'k', 'E'])
 
     # FFT of fields
     Uf = [np.fft.fftn(U[0]),
@@ -65,58 +65,66 @@ def energy_spectra(U, N, L):
     K = np.meshgrid(k0, k1, k2)
     kmag = np.sqrt(K[0]**2 + K[1]**2 + K[2]**2)
     halfN = np.array([int(n / 2) for n in N], dtype=np.int64)
-
-    # Calculate the 1D energy spectra Eii(kj)
-    df = pd.DataFrame(columns=['name', 'k', 'E'])
-    for i in range(3):
-
-        # Energy
-        Eiif = np.real(Uf[i] * np.conj(Uf[i])) / (np.prod(N)**2)
-
-        # Wavenumber spacing (shell thickness)
-        dkdk = float(kmax[(i + 1) % 3]) / N[(i + 1) % 3] \
-            * float(kmax[(i + 2) % 3]) / N[(i + 2) % 3]
-
-        for j in range(3):
-
-            # Binning
-            kbins = np.arange(0, halfN[j] + 1)
-            whichbin = np.digitize(np.abs(K[j]).flat, kbins)
-            ncount = np.bincount(whichbin)
-
-            # Summation in each wavenumber bin
-            E = np.zeros(len(kbins))
-            for n in range(1, len(ncount)):
-                E[n - 1] = 2 * np.sum(Eiif.flat[whichbin == n]) * dkdk
-            E[E < 1e-13] = 0.0
-
-            # Store the data
-            subdf = pd.DataFrame(columns=['name', 'k', 'E'])
-            subdf['k'] = kbins
-            subdf['E'] = E
-            subdf['name'] = 'E{0:d}{0:d}(k{1:d})'.format(i, j)
-            df = pd.concat([df, subdf], ignore_index=True)
-
-    # Calculate the 3D energy spectra multiplied by the surface area
-    # of the sphere at kmag.
-    E3D = 2.0 * np.pi * kmag**2 \
-        * np.real(Uf[0] * np.conj(Uf[0])
-                  + Uf[1] * np.conj(Uf[1])
-                  + Uf[2] * np.conj(Uf[2])) / (np.prod(N)**2)
-
-    # Binning
     kbins = np.hstack((-1e-16,
                        np.arange(0.5, halfN[0] - 1),
                        halfN[0] - 1))
+
+    # Energy in Fourier space
+    Ef = 0.5 * np.real(Uf[0] * np.conj(Uf[0])
+                       + Uf[1] * np.conj(Uf[1])
+                       + Uf[2] * np.conj(Uf[2])) / (np.prod(N)**2)
+
+    # Filter the data with ellipsoid filter
+    ellipse = (K[0] / kmax[0])**2 \
+        + (K[1] / kmax[1])**2 \
+        + (K[2] / kmax[2])**2 <= 1.0
+    Ef = np.where(ellipse, Ef, np.nan)
+    K = np.where(ellipse, K[0], np.nan),\
+        np.where(ellipse, K[1], np.nan),\
+        np.where(ellipse, K[2], np.nan)
+    kmag = np.where(ellipse, kmag, np.nan)
+
+    # =========================================================================
+    # 1D spectra Eii(kj)
+
+    for j in range(3):
+        jm = (j + 1) % 3
+        jn = (j + 2) % 3
+
+        # Binning
+        whichbin = np.digitize(np.abs(K[j]).flat, kbins, right=True)
+        ncount = np.bincount(whichbin)
+
+        # Average in each wavenumber bin
+        E = np.zeros(len(kbins) - 2)
+        for k, n in enumerate(range(1, len(kbins) - 1)):
+            area = np.pi * kmax[jm] * kmax[jn] * np.sqrt(1 - (k / kmax[j])**2)
+            E[k] = 0.5 * np.pi * np.mean(Ef.flat[whichbin == n]) * area
+        E[E < 1e-13] = 0.0
+
+        # Store the data
+        subdf = pd.DataFrame(columns=['name', 'k', 'E'])
+        subdf['k'] = np.arange(0, kmax[j])
+        subdf['E'] = E
+        subdf['name'] = 'E{0:d}{0:d}(k{1:d})'.format(j, j)
+        df = pd.concat([df, subdf], ignore_index=True)
+
+    # =========================================================================
+    # 3D spectrum
+
+    # Multiply spectra by the surface area of the sphere at kmag.
+    E3D = 4.0 * np.pi * kmag**2 * Ef
+
+    # Binning
     whichbin = np.digitize(kmag.flat, kbins, right=True)
     ncount = np.bincount(whichbin)
 
     # Average in each wavenumber bin
     E = np.zeros(len(kbins) - 1)
     kavg = np.zeros(len(kbins) - 1)
-    for n in range(1, len(kbins)):
-        E[n - 1] = np.mean(E3D.flat[whichbin == n])
-        kavg[n - 1] = np.mean(kmag.flat[whichbin == n])
+    for k, n in enumerate(range(1, len(kbins))):
+        E[k] = np.mean(E3D.flat[whichbin == n])
+        kavg[k] = np.mean(kmag.flat[whichbin == n])
     E[E < 1e-13] = 0.0
 
     # Store the data

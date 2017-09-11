@@ -24,29 +24,31 @@ class TurbulencePostProcessingTestCase(unittest.TestCase):
         self.V = np.cos(4 * X) + np.cos(8 * Y) + np.cos(2 * Z)
         self.W = np.cos(8 * X) + np.cos(2 * Y) + np.cos(4 * Z)
 
-    def test_energy_spectra(self):
-        """Is the energy spectra calculation correct?"""
+    def test_energy_spectra_1D(self):
+        """Is the 1D energy spectra calculation correct?"""
         spectra = tp.energy_spectra([self.U, self.V, self.W], self.N, self.L)
 
         npt.assert_array_almost_equal(spectra[spectra['name'] == 'E00(k0)'].E,
-                                      np.array([4.5619010925292969e-01,
-                                                1.4605263152219195e-03,
-                                                2.2386120212584928e-01,
-                                                6.7442813799552270e-04,
-                                                1.0720979017672000e-04,
-                                                3.3203539948815836e-05,
-                                                1.3551381799540367e-05,
-                                                6.4286163047664882e-06,
-                                                3.3376728983783624e-06,
-                                                1.8279914430695195e-06,
-                                                1.0269758955349610e-06,
-                                                5.7614524958903159e-07,
-                                                3.1222570170418413e-07,
-                                                1.5503327531902072e-07,
-                                                6.3177488588052565e-08,
-                                                1.5006493455757903e-08,
-                                                0.0000000000000000e+00]),
+                                      np.array([2.4385440189650232e+00,
+                                                2.9914191778951629e-03,
+                                                2.0322422333186274e-01,
+                                                5.0888977717213207e-03,
+                                                1.9856548956683193e-01,
+                                                5.3322259537962715e-03,
+                                                4.0160669234318592e-03,
+                                                9.6830518347628923e-03,
+                                                1.9548206246123070e-01,
+                                                2.0993390517673238e-02,
+                                                3.1417705304799411e-03,
+                                                1.0810948863068269e-03,
+                                                4.9213284563453706e-04,
+                                                2.3880265240150747e-04,
+                                                1.1354528541439582e-04]),
                                       decimal=10)
+
+    def test_energy_spectra_3D(self):
+        """Is the 3D energy spectra calculation correct?"""
+        spectra = tp.energy_spectra([self.U, self.V, self.W], self.N, self.L)
 
         npt.assert_array_almost_equal(spectra[spectra['name'] == 'E3D'].E,
                                       np.array([0.0000000000000000e+00,
