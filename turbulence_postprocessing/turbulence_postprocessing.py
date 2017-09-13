@@ -70,9 +70,9 @@ def energy_spectra(U, N, L):
                        halfN[0] - 1))
 
     # Energy in Fourier space
-    Ef = 0.5 * np.real(Uf[0] * np.conj(Uf[0])
-                       + Uf[1] * np.conj(Uf[1])
-                       + Uf[2] * np.conj(Uf[2])) / (np.prod(N)**2)
+    Ef = 0.5 / (np.prod(N)**2) * (np.absolute(Uf[0])**2
+                                  + np.absolute(Uf[1])**2
+                                  + np.absolute(Uf[2])**2)
 
     # Filter the data with ellipsoid filter
     ellipse = (K[0] / kmax[0])**2 \
