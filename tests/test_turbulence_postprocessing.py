@@ -29,21 +29,21 @@ class TurbulencePostProcessingTestCase(unittest.TestCase):
         spectra = tp.energy_spectra([self.U, self.V, self.W], self.N, self.L)
 
         npt.assert_array_almost_equal(spectra[spectra['name'] == 'E00(k0)'].E,
-                                      np.array([2.4385440189650232e+00,
-                                                2.9914191778951629e-03,
-                                                2.0322422333186274e-01,
-                                                5.0888977717213207e-03,
-                                                1.9856548956683193e-01,
-                                                5.3322259537962715e-03,
-                                                4.0160669234318592e-03,
-                                                9.6830518347628923e-03,
-                                                1.9548206246123070e-01,
-                                                2.0993390517673238e-02,
-                                                3.1417705304799411e-03,
-                                                1.0810948863068269e-03,
-                                                4.9213284563453706e-04,
-                                                2.3880265240150747e-04,
-                                                1.1354528541439582e-04]),
+                                      np.array([1.5524253382618400e+00,
+                                                1.9043965960876359e-03,
+                                                1.2937655879710899e-01,
+                                                3.2396929410351194e-03,
+                                                1.2641071676809387e-01,
+                                                3.3946004729182920e-03,
+                                                2.5567076106081631e-03,
+                                                6.1644222548702448e-03,
+                                                1.2444774610601403e-01,
+                                                1.3364807492584877e-02,
+                                                2.0001132399453158e-03,
+                                                6.8824638042840861e-04,
+                                                3.1330150016246905e-04,
+                                                1.5202649021262232e-04,
+                                                7.2285173753924731e-05]),
                                       decimal=10)
 
     def test_energy_spectra_3D(self):
@@ -149,6 +149,13 @@ class TurbulencePostProcessingTestCase(unittest.TestCase):
                                                 0.0968242917758608,
                                                 0.0198170012870652]),
                                       decimal=10)
+
+    def test_dissipation(self):
+        """Is the dissipation calculation correct?"""
+        dissipation = tp.dissipation(
+            [self.U, self.V, self.W], self.N, self.L, 0.4)
+
+        npt.assert_almost_equal(dissipation, 51.7389774006043481)
 
 
 if __name__ == '__main__':

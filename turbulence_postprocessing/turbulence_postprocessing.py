@@ -18,7 +18,8 @@ import scipy.integrate as spi
 #
 # ========================================================================
 def energy_spectra(U, N, L):
-    """Get the 1D and 3D energy spectra from 3D data.
+    """
+    Get the 1D and 3D energy spectra from 3D data.
 
     The 3D energy spectrum is defined as (see Eq. 6.188 in Pope):
 
@@ -43,7 +44,6 @@ def energy_spectra(U, N, L):
     :type L: list
     :return: Dataframe of 1D and 3D energy spectra
     :rtype: dataframe
-
     """
 
     # =========================================================================
@@ -99,7 +99,7 @@ def energy_spectra(U, N, L):
         E = np.zeros(len(kbins) - 2)
         for k, n in enumerate(range(1, len(kbins) - 1)):
             area = np.pi * kmax[jm] * kmax[jn] * np.sqrt(1 - (k / kmax[j])**2)
-            E[k] = 0.5 * np.pi * np.mean(Ef.flat[whichbin == n]) * area
+            E[k] = np.mean(Ef.flat[whichbin == n]) * area
         E[E < 1e-13] = 0.0
 
         # Store the data
@@ -135,6 +135,49 @@ def energy_spectra(U, N, L):
     df = pd.concat([df, subdf], ignore_index=True)
 
     return df
+
+
+# ========================================================================
+def dissipation(U, N, L, viscosity):
+    """
+    Get the dissipation.
+
+    The dissipation is defined as (see Eq. 6.160 in Pope):
+
+    - :math:`\\epsilon = 2 \\nu \\sum_k k^2 E({\\mathbf{k}})`
+
+    where :math:`k=\\sqrt{k_0^2 + k_1^2 + k_2^2}`.
+
+    :param U: momentum, [:math:`u`, :math:`v`, :math:`w`]
+    :type U: list
+    :param N: number of points, [:math:`n_x`, :math:`n_y`, :math:`n_z`]
+    :type N: list
+    :param L: domain lengths, [:math:`L_x`, :math:`L_y`, :math:`L_z`]
+    :type L: list
+    :param viscosity: kinematic viscosity
+    :type viscosity: double
+    :return: dissipation
+    :rtype: double
+    """
+
+    # FFT of fields
+    Uf = [np.fft.fftn(U[0]),
+          np.fft.fftn(U[1]),
+          np.fft.fftn(U[2])]
+
+    # Wavenumbers
+    k0 = np.fft.fftfreq(Uf[0].shape[0]) * N[0]
+    k1 = np.fft.fftfreq(Uf[0].shape[1]) * N[1]
+    k2 = np.fft.fftfreq(Uf[0].shape[2]) * N[2]
+    K = np.meshgrid(k0, k1, k2)
+    kmag2 = K[0]**2 + K[1]**2 + K[2]**2
+
+    # Energy in Fourier space
+    Ef = 0.5 / (np.prod(N)**2) * (np.absolute(Uf[0])**2
+                                  + np.absolute(Uf[1])**2
+                                  + np.absolute(Uf[2])**2)
+
+    return 2.0 * viscosity * np.sum(kmag2 * Ef)
 
 
 # ========================================================================
