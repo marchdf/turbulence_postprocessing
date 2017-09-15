@@ -18,14 +18,22 @@ import scipy.integrate as spi
 #
 # ========================================================================
 def energy_spectra(U, N, L):
-    """
-    Get the 1D and 3D energy spectra from 3D data.
+    """Get the 1D and 3D energy spectra from 3D data.
+
+    The 1D energy spectra are defined as:
+
+    - :math:`E_{00}(k_0) = \\frac{1}{2} \\int \\int \\phi_{ii}(k_0,k_1,k_2) \\mathrm{d}k_1 \\mathrm{d}k_2`
+    - :math:`E_{11}(k_1) = \\frac{1}{2} \\int \\int \\phi_{ii}(k_0,k_1,k_2) \\mathrm{d}k_0 \\mathrm{d}k_2`
+    - :math:`E_{22}(k_2) = \\frac{1}{2} \\int \\int \\phi_{ii}(k_0,k_1,k_2) \\mathrm{d}k_0 \\mathrm{d}k_1`
 
     The 3D energy spectrum is defined as (see Eq. 6.188 in Pope):
 
     - :math:`E_{3D}(k) = \\frac{1}{2} \\int_S \\phi_{ii}(k_0,k_1,k_2) \\mathrm{d}S(k)`
 
-    where :math:`k=\\sqrt{k_0^2 + k_1^2 + k_2^2}`.
+    where :math:`k=\\sqrt{k_0^2 + k_1^2 + k_2^2}` and
+    :math:`\\phi_{ii}(k_0,k_1,k_2) = u_i u_i` (velocities
+    in Fourier space) is filtered so that only valid wavenumber
+    combinations are counted.
 
     .. note::
 
@@ -44,6 +52,7 @@ def energy_spectra(U, N, L):
     :type L: list
     :return: Dataframe of 1D and 3D energy spectra
     :rtype: dataframe
+
     """
 
     # =========================================================================
@@ -139,12 +148,11 @@ def energy_spectra(U, N, L):
 
 # ========================================================================
 def dissipation(U, N, L, viscosity):
-    """
-    Get the dissipation.
+    """Calculate the dissipation.
 
     The dissipation is defined as (see Eq. 6.160 in Pope):
 
-    - :math:`\\epsilon = 2 \\nu \\sum_k k^2 E({\\mathbf{k}})`
+    - :math:`\\epsilon = 2 \\mu \\sum_k k^2 E({\\mathbf{k}})`
 
     where :math:`k=\\sqrt{k_0^2 + k_1^2 + k_2^2}`.
 
@@ -154,10 +162,11 @@ def dissipation(U, N, L, viscosity):
     :type N: list
     :param L: domain lengths, [:math:`L_x`, :math:`L_y`, :math:`L_z`]
     :type L: list
-    :param viscosity: kinematic viscosity
+    :param viscosity: dynamic viscosity, :math:`\\mu`
     :type viscosity: double
-    :return: dissipation
+    :return: dissipation, :math:`\\epsilon`
     :rtype: double
+
     """
 
     # FFT of fields
@@ -182,8 +191,7 @@ def dissipation(U, N, L, viscosity):
 
 # ========================================================================
 def integral_length_scale_tensor(U, N, L):
-    """
-    Calculate the integral lengthscale tensor.
+    """Calculate the integral lengthscale tensor.
 
     :math:`L_{ij} = \\frac{1}{R_{ii}(0)} \\int_0^\\infty R_{ii}(e_j r) \\mathrm{d} r`
     where :math:`R_{ij}(\\mathbf{r}) = \\langle u_i(\\mathbf{x}) u_j(\\mathbf{x}+\\mathbf{r}) \\rangle`
@@ -196,6 +204,7 @@ def integral_length_scale_tensor(U, N, L):
     :type L: list
     :return: Array of the lengthscale tensor, :math:`L_{ij}`
     :rtype: array
+
     """
 
     dr = L / N
@@ -227,8 +236,7 @@ def integral_length_scale_tensor(U, N, L):
 
 # ========================================================================
 def structure_functions(U, N, L):
-    """
-    Calculate the longitudinal and transverse structure functions.
+    """Calculate the longitudinal and transverse structure functions.
 
     :math:`D_{ij}(r) = \\int_V (u_i(x+r,y,z)-u_i(x,y,z)) (u_j(x+r,y,z)-u_j(x,y,z)) \\mathrm{d} V`
 
@@ -242,6 +250,7 @@ def structure_functions(U, N, L):
     :type L: list
     :return: Dataframe of structure functions (:math:`S_{L}`, :math:`S_{T1}`, and :math:`S_{T2}`)
     :rtype: dataframe
+
     """
 
     # Get the structure functions
