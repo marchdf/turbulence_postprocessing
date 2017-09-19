@@ -152,7 +152,7 @@ def dissipation(U, N, L, viscosity):
 
     The dissipation is defined as (see Eq. 6.160 in Pope):
 
-    - :math:`\\epsilon = 2 \\mu \\sum_k k^2 E({\\mathbf{k}})`
+    - :math:`\\epsilon = 2 \\nu \\sum_k k^2 E({\\mathbf{k}})`
 
     where :math:`k=\\sqrt{k_0^2 + k_1^2 + k_2^2}`.
 
@@ -162,7 +162,7 @@ def dissipation(U, N, L, viscosity):
     :type N: list
     :param L: domain lengths, [:math:`L_x`, :math:`L_y`, :math:`L_z`]
     :type L: list
-    :param viscosity: dynamic viscosity, :math:`\\mu`
+    :param viscosity: kinematic viscosity, :math:`\\nu`
     :type viscosity: double
     :return: dissipation, :math:`\\epsilon`
     :rtype: double
